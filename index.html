@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css">
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+        <style>
+			.wrapper {
+			  min-height: 100vh;
+			  height: auto;
+			  overflow: visible;
+			}
+
+			body {
+			  font-family: 'Segoe UI', sans-serif;
+			  background: #f0f8ff;
+			  margin: 0;
+			  padding: 500px;
+			}
+			
+			.judul-wrapper {
+			  background-color: #ffffff;
+			  padding: 30px 50px;
+			  border-radius: 15px;
+			  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+			  max-width: 1000px;
+			  margin: 0 auto 30px auto;
+			  text-align: center;
+			}
+
+			.judul-fasilitas {
+			  font-size: 36px;
+			  font-weight: bold;
+			  margin: 0;
+			  background: linear-gradient(to right, #007bff, green);
+			  -webkit-background-clip: text;
+			  -webkit-text-fill-color: transparent;
+			}
+
+			.info-wrapper {
+			  background-color: #ffffff;
+			  padding: 30px;
+			  border-radius: 12px;
+			  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+			  max-width: 900px;
+			  margin: auto;
+			}
+
+			.main-title {
+			  text-align: center;
+			  color: #007bff;
+			  font-size: 32px;
+			  margin-bottom: 20px;
+			  font-weight: bold;
+			}
+
+			.description-box {
+			  background-color: #f8f9fa;
+			  padding: 20px;
+			  border-left: 6px solid #007bff;
+			  border-radius: 10px;
+			  font-size: 16px;
+			  color: #333;
+			  line-height: 1.6;
+			}
+			
+			.facility-options {
+			  text-align: center;
+			  margin-bottom: 20px;
+			}
+
+			.facility-options button {
+			  background-color: #007bff;
+			  color: white;
+			  border: none;
+			  margin: 5px;
+			  padding: 10px 18px;
+			  border-radius: 8px;
+			  font-weight: bold;
+			  cursor: pointer;
+			  transition: background-color 0.3s ease;
+			}
+
+			.facility-options button:hover {
+			  background-color: #0056b3;
+			}
+
+			.facility-options .reset {
+			  background-color: #6c757d;
+			}
+
+			.facility-options .reset:hover {
+			  background-color: #5a6268;
+			}
+
+			.description-box {
+			  background-color: #ffffff;
+			  padding: 30px;
+			  border-radius: 14px;
+			  max-width: 900px;
+			  margin: 0 auto;
+			  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+			  color: #333;
+			  font-size: 16px;
+			  line-height: 1.6;
+			  text-align: justify;
+			}
+
+			.description-title {
+			  text-align: center;
+			  font-size: 24px;
+			  margin-bottom: 20px;
+			  color: #007bff;
+			}
+
+			html, body {
+			  height: auto !important;
+			  margin: 0;
+			  padding: 0;
+			  overflow-x: hidden;
+			  overflow-y: auto;
+			}
+
+			body::after {
+			  content: '';
+			  display: block;
+			  height: 100px; /* ruang bawah ekstra */
+			}
+
+			/* Pastikan map tidak menekan layout */
+			#map {
+			  height: 500px;
+			  width: 100%;
+			  border-radius: 14px;
+			  display: block;
+			}
+
+			.map-container {
+			  background: rgba(255, 255, 255, 0.95);
+			  padding: 20px;
+			  border-radius: 20px;
+			  max-width: 1000px;
+			  margin: 40px auto;
+			  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+			}
+			
+			.footer-credit {
+			  text-align: center;
+			  font-size: 14px;
+			  color: #666;
+			  margin-top: 30px;
+			  margin-bottom: 40px;
+			  font-style: italic;
+			}
+			
+			 hr 
+			{border: none; height: 2px; background-color: #FFD700;
+            margin: 20px 0;}
+
+			/* Box Nama Pembuat */
+			.creator-box {
+			  background-color: #ffffff;
+			  border-left: 5px solid #007bff;
+			  padding: 15px 25px;
+			  margin: 40px auto 20px;
+			  max-width: 900px;
+			  border-radius: 10px;
+			  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+			  font-size: 15px;
+			  color: #333;
+			  text-align: center;
+			}
+
+			/* Footer Organisasi */
+			.footer-org {
+			  background-color: #007bff;
+			  color: #ffffff;
+			  text-align: center;
+			  padding: 20px 10px;
+			  font-size: 14px;
+			  font-weight: 500;
+			  margin-top: 40px;
+			}
+
+
+        </style>
+        <title>Pusat Informasi </title>
+    </head>
+    <body>
+			
+			<div class="judul-wrapper">
+			  <h1 class="judul-fasilitas">SEBARAN FASILITAS UMUM</h1>
+			</div>
+					
+					
+			<div id="descriptionBox" class="description-box">
+			  <h2 class="description-title">Sebaran Fasilitas Umum</h2>
+			  <p id="descriptionText">
+				Peta sebaran fasilitas di Kota Bandar Lampung, fasilitas umum yang ditampilkan memiliki peran penting dalam menunjang
+				  kehidupan keseharian masyarakat, persebaran yang tersedia sudah cukup baik untuk mengakomodir setiap kebutuhan masyarakat dalam menggerakan perekonomian
+				  dengan adanya sebaran SPBU di setiap penjuru kota, lalu adanya rumah sakit membantu masyarakat dalam menjangkau fasilitas kesehatan dalam sibuknya menjalankan keseharian,
+				  lalu adanya terminal juga membantu masyarakat untuk melakukan mobilitas luar kode dengan efisien serta aman.
+			  </p>
+			</div>
+			<div class="facility-options">
+			  <button onclick="showDescription('spbu')">SPBU</button>
+			  <button onclick="showDescription('rs')">Rumah Sakit</button>
+			  <button onclick="showDescription('terminal')">Terminal</button>
+			  <button onclick="resetDescription()" class="reset">Reset</button>
+			</div>
+			
+			<div class="map-container">
+			  <div id="map"></div>
+			</div>
+
+		
+						<<script>
+		  const defaultDescription = `Peta sebaran fasilitas di Kota Bandar Lampung, fasilitas umum yang ditampilkan memiliki peran penting dalam menunjang
+						  kehidupan keseharian masyarakat, persebaran yang tersedia sudah cukup baik untuk mengakomodir setiap kebutuhan masyarakat dalam menggerakan perekonomian
+						  dengan adanya sebaran SPBU di setiap penjuru kota, lalu adanya rumah sakit membantu masyarakat dalam menjangkau fasilitas kesehatan dalam sibuknya menjalankan keseharian,
+						  lalu adanya terminal juga membantu masyarakat untuk melakukan mobilitas luar kode dengan efisien serta aman.`;
+
+		  function showDescription(type) {
+			const descriptionText = document.getElementById("descriptionText");
+
+			switch (type) {
+			  case 'spbu':
+				descriptionText.innerHTML = `
+				  <strong>SPBU (Stasiun Pengisian Bahan Bakar Umum)</strong> merupakan fasilitas penting untuk memenuhi kebutuhan energi transportasi masyarakat. 
+				  SPBU tersebar di berbagai titik strategis untuk menjamin ketersediaan bahan bakar.
+				`;
+				break;
+			  case 'rs':
+				descriptionText.innerHTML = `
+				  <strong>Rumah Sakit</strong> menyediakan pelayanan kesehatan umum dan spesialis bagi masyarakat. 
+				  Keberadaan rumah sakit memudahkan akses terhadap layanan medis di Kota Bandar Lampung.
+				`;
+				break;
+			  case 'terminal':
+				descriptionText.innerHTML = `
+				  <strong>Terminal</strong> Memiliki peran sabagai lokasi perpindahan penduduk untuk melakukan aktivitas sehari-hari, 
+				  sehingga dengan adanya terminal ini akan memudahkan dalam melakukan perpindahan tempat masyarakat Bandar Lampung maupun pendatang.
+				`;
+				break;
+			}
+		  }
+
+
+
+		  function resetDescription() {
+			document.getElementById("descriptionText").innerHTML = defaultDescription;
+		  }
+		</script>
+
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <script src="data/SHPBANDARLAMPUNG_1.js"></script>
+        <script src="data/SPBU_2.js"></script>
+        <script src="data/RumahSakit_3.js"></script>
+        <script src="data/Terminal_4.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-5.464893810761551,105.17328752407958],[-5.350964514481584,105.4142727514951]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_ESRISatellite_0');
+        map.getPane('pane_ESRISatellite_0').style.zIndex = 400;
+        var layer_ESRISatellite_0 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            pane: 'pane_ESRISatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_ESRISatellite_0;
+        map.addLayer(layer_ESRISatellite_0);
+        function pop_SHPBANDARLAMPUNG_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['objectid_1'] !== null ? autolinker.link(String(feature.properties['objectid_1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama_prop'] !== null ? autolinker.link(String(feature.properties['nama_prop']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama_kab'] !== null ? autolinker.link(String(feature.properties['nama_kab']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">nama_kec</th>\
+                        <td>' + (feature.properties['nama_kec'] !== null ? autolinker.link(String(feature.properties['nama_kec']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 100 });
+        }
+
+        function style_SHPBANDARLAMPUNG_1_0(feature) {
+            switch(String(feature.properties['nama_kec'])) {
+                case 'BUMI WARAS':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,251,255,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'ENGGAL':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,245,252,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDAMAIAN':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,239,249,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDATON':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,233,246,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'KEMILING':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,226,243,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'LABUHAN RATU':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,220,240,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'LANGKAPURA':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(186,214,235,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'PANJANG':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(170,207,229,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'RAJABASA':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(154,200,224,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKABUMI':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,189,220,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKARAME':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(115,178,216,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TANJUNG SENANG':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(98,168,210,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TANJUNGKARANG BARAT':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(82,157,204,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TANJUNGKARANG PUSAT':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(66,146,198,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TANJUNGKARANG TIMUR':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(53,133,191,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TELUKBETUNG BARAT':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(41,121,185,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TELUKBETUNG SELATAN':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,108,177,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TELUKBETUNG TIMUR':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(18,94,166,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'TELUKBETUNG UTARA':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,81,156,0.4)',
+                interactive: true,
+            }
+                    break;
+                case 'WAY HALIM':
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,65,132,0.4)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_SHPBANDARLAMPUNG_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.4)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,48,107,0.4)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SHPBANDARLAMPUNG_1');
+        map.getPane('pane_SHPBANDARLAMPUNG_1').style.zIndex = 401;
+        map.getPane('pane_SHPBANDARLAMPUNG_1').style['mix-blend-mode'] = 'normal';
+        var layer_SHPBANDARLAMPUNG_1 = new L.geoJson(json_SHPBANDARLAMPUNG_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SHPBANDARLAMPUNG_1',
+            layerName: 'layer_SHPBANDARLAMPUNG_1',
+            pane: 'pane_SHPBANDARLAMPUNG_1',
+            onEachFeature: pop_SHPBANDARLAMPUNG_1,
+            style: style_SHPBANDARLAMPUNG_1_0,
+        });
+        bounds_group.addLayer(layer_SHPBANDARLAMPUNG_1);
+        map.addLayer(layer_SHPBANDARLAMPUNG_1);
+        function pop_SPBU_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">SPBU</th>\
+                        <td class="visible-with-data" id="SPBU">' + (feature.properties['SPBU'] !== null ? autolinker.link(String(feature.properties['SPBU']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['x'] !== null ? autolinker.link(String(feature.properties['x']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['y'] !== null ? autolinker.link(String(feature.properties['y']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SPBU_2_0() {
+            return {
+                pane: 'pane_SPBU_2',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/SPBU_2.svg',
+            iconSize: [15.2, 15.2]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_SPBU_2');
+        map.getPane('pane_SPBU_2').style.zIndex = 402;
+        map.getPane('pane_SPBU_2').style['mix-blend-mode'] = 'normal';
+        var layer_SPBU_2 = new L.geoJson(json_SPBU_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SPBU_2',
+            layerName: 'layer_SPBU_2',
+            pane: 'pane_SPBU_2',
+            onEachFeature: pop_SPBU_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_SPBU_2_0(feature));
+            },
+        });
+        var cluster_SPBU_2 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_SPBU_2.addLayer(layer_SPBU_2);
+
+        bounds_group.addLayer(layer_SPBU_2);
+        cluster_SPBU_2.addTo(map);
+        function pop_RumahSakit_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NAMOBJ</th>\
+                        <td class="visible-with-data" id="NAMOBJ">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(String(feature.properties['NAMOBJ']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FCODE'] !== null ? autolinker.link(String(feature.properties['FCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCODE'] !== null ? autolinker.link(String(feature.properties['LCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARK'] !== null ? autolinker.link(String(feature.properties['REMARK']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['METADATA'] !== null ? autolinker.link(String(feature.properties['METADATA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SRS_ID'] !== null ? autolinker.link(String(feature.properties['SRS_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPRST'] !== null ? autolinker.link(String(feature.properties['TIPRST']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['JPLYRS'] !== null ? autolinker.link(String(feature.properties['JPLYRS']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ALAMAT'] !== null ? autolinker.link(String(feature.properties['ALAMAT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RumahSakit_3_0() {
+            return {
+                pane: 'pane_RumahSakit_3',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/RumahSakit_3.svg',
+            iconSize: [15.200000000000006, 15.200000000000006]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_RumahSakit_3');
+        map.getPane('pane_RumahSakit_3').style.zIndex = 403;
+        map.getPane('pane_RumahSakit_3').style['mix-blend-mode'] = 'normal';
+        var layer_RumahSakit_3 = new L.geoJson(json_RumahSakit_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RumahSakit_3',
+            layerName: 'layer_RumahSakit_3',
+            pane: 'pane_RumahSakit_3',
+            onEachFeature: pop_RumahSakit_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_RumahSakit_3_0(feature));
+            },
+        });
+        var cluster_RumahSakit_3 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_RumahSakit_3.addLayer(layer_RumahSakit_3);
+
+        bounds_group.addLayer(layer_RumahSakit_3);
+        cluster_RumahSakit_3.addTo(map);
+        function pop_Terminal_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NAMOBJ</th>\
+                        <td class="visible-with-data" id="NAMOBJ">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(String(feature.properties['NAMOBJ']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KODTRM'] !== null ? autolinker.link(String(feature.properties['KODTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MGTTRM'] !== null ? autolinker.link(String(feature.properties['MGTTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['STATRM'] !== null ? autolinker.link(String(feature.properties['STATRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KATTRM'] !== null ? autolinker.link(String(feature.properties['KATTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPTRM'] !== null ? autolinker.link(String(feature.properties['TIPTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LUAS'] !== null ? autolinker.link(String(feature.properties['LUAS']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['THBTRM'] !== null ? autolinker.link(String(feature.properties['THBTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['THOTRM'] !== null ? autolinker.link(String(feature.properties['THOTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['THSTRM'] !== null ? autolinker.link(String(feature.properties['THSTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KONKON'] !== null ? autolinker.link(String(feature.properties['KONKON']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['JLBTRM'] !== null ? autolinker.link(String(feature.properties['JLBTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KEBTRM'] !== null ? autolinker.link(String(feature.properties['KEBTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['JLDTRM'] !== null ? autolinker.link(String(feature.properties['JLDTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KEDTRM'] !== null ? autolinker.link(String(feature.properties['KEDTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PARTRM'] !== null ? autolinker.link(String(feature.properties['PARTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KEPTRM'] !== null ? autolinker.link(String(feature.properties['KEPTRM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FCODE'] !== null ? autolinker.link(String(feature.properties['FCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARK'] !== null ? autolinker.link(String(feature.properties['REMARK']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SRS_ID'] !== null ? autolinker.link(String(feature.properties['SRS_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCODE'] !== null ? autolinker.link(String(feature.properties['LCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['METADATA'] !== null ? autolinker.link(String(feature.properties['METADATA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Terminal_4_0() {
+            return {
+                pane: 'pane_Terminal_4',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Terminal_4.svg',
+            iconSize: [18.240000000000002, 18.240000000000002]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Terminal_4');
+        map.getPane('pane_Terminal_4').style.zIndex = 404;
+        map.getPane('pane_Terminal_4').style['mix-blend-mode'] = 'normal';
+        var layer_Terminal_4 = new L.geoJson(json_Terminal_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Terminal_4',
+            layerName: 'layer_Terminal_4',
+            pane: 'pane_Terminal_4',
+            onEachFeature: pop_Terminal_4,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Terminal_4_0(feature));
+            },
+        });
+        var cluster_Terminal_4 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_Terminal_4.addLayer(layer_Terminal_4);
+
+        bounds_group.addLayer(layer_Terminal_4);
+        cluster_Terminal_4.addTo(map);
+        var overlaysTree = [
+            {label: '<img src="legend/Terminal_4.png" /> Terminal', layer: cluster_Terminal_4},
+            {label: '<img src="legend/RumahSakit_3.png" /> Rumah Sakit', layer: cluster_RumahSakit_3},
+            {label: '<img src="legend/SPBU_2.png" /> SPBU', layer: cluster_SPBU_2},
+            {label: 'SHP BANDAR LAMPUNG<br /><table><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_BUMIWARAS0.png" /></td><td>BUMI WARAS</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_ENGGAL1.png" /></td><td>ENGGAL</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_KEDAMAIAN2.png" /></td><td>KEDAMAIAN</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_KEDATON3.png" /></td><td>KEDATON</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_KEMILING4.png" /></td><td>KEMILING</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_LABUHANRATU5.png" /></td><td>LABUHAN RATU</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_LANGKAPURA6.png" /></td><td>LANGKAPURA</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_PANJANG7.png" /></td><td>PANJANG</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_RAJABASA8.png" /></td><td>RAJABASA</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_SUKABUMI9.png" /></td><td>SUKABUMI</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_SUKARAME10.png" /></td><td>SUKARAME</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TANJUNGSENANG11.png" /></td><td>TANJUNG SENANG</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TANJUNGKARANGBARAT12.png" /></td><td>TANJUNGKARANG BARAT</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TANJUNGKARANGPUSAT13.png" /></td><td>TANJUNGKARANG PUSAT</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TANJUNGKARANGTIMUR14.png" /></td><td>TANJUNGKARANG TIMUR</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TELUKBETUNGBARAT15.png" /></td><td>TELUKBETUNG BARAT</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TELUKBETUNGSELATAN16.png" /></td><td>TELUKBETUNG SELATAN</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TELUKBETUNGTIMUR17.png" /></td><td>TELUKBETUNG TIMUR</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_TELUKBETUNGUTARA18.png" /></td><td>TELUKBETUNG UTARA</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_WAYHALIM19.png" /></td><td>WAY HALIM</td></tr><tr><td style="text-align: center;"><img src="legend/SHPBANDARLAMPUNG_1_20.png" /></td><td></td></tr></table>', layer: layer_SHPBANDARLAMPUNG_1},
+            {label: "ESRI Satellite", layer: layer_ESRISatellite_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_SHPBANDARLAMPUNG_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama_kec'] !== null?String('<div style="color: #323232; font-size: 5pt; font-family: \'Sans Serif Collection\', sans-serif;">' + layer.feature.properties['nama_kec']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_SHPBANDARLAMPUNG_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_SHPBANDARLAMPUNG_1]);
+        map.on("zoomend", function(){
+            resetLabels([layer_SHPBANDARLAMPUNG_1]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_SHPBANDARLAMPUNG_1]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_SHPBANDARLAMPUNG_1]);
+        });
+        </script>
+		
+		<div class="creator-box">
+		  Dibuat oleh: <strong>Affuan Rusnaldi (2213034018)</strong> &middot; 2025
+		</div>
+		<footer class="footer-org">
+		  © 2025 Pendidikan Geografi - Universitas Lampung
+		</footer>
+
+    </body>
+</html>
